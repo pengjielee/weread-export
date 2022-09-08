@@ -7,6 +7,7 @@ const pathname = window.location.pathname
 const homePage = 'https://weread.qq.com/'
 const shelfPage = 'https://weread.qq.com/web/shelf'
 const bookPage = '/web/reader/'
+const shelfArchivePage = 'https://weread.qq.com/web/shelf/archive';
 
 
 var shelfdict = {}
@@ -122,7 +123,7 @@ function shelfInsertCheckbox() {
       if (shelfdict[_key]) {
         $(this).append($(`
         <div class="m_webook_shelf_checkbox" style="padding: 5px; display: flex; align-items: center; justify-content: center;">
-          <input type="checkbox" data-id="${shelfdict[_key].bookId}" />
+          <input type="checkbox" data-id="${shelfdict[_key].bookId}" style="transform:scale(2)"/>
         </div>
         `))
         $(this).attr('id', `bookid-${shelfdict[_key].bookId}`)
@@ -427,6 +428,10 @@ $(document).ready(function() {
   .css_ui_1 {
     background-color: #e2e2e4;
   }
+  .shelfBook .title {
+    min-height: 36px;
+    margin-bottom: 10px;
+  }
   `
 
   $('body').prepend(`<style>${_css}</style>`)
@@ -668,7 +673,7 @@ $(document).ready(function() {
     })
   }
 
-  if (currentpath === homePage || currentpath === shelfPage) {
+  if (currentpath === homePage || currentpath === shelfPage || currentpath.indexOf(shelfArchivePage) >= 0) {
     setTimeout(function() {
       chrome.storage.local.get(['viduri', 'last_user_info'], function(result) {
         var viduri = result.viduri
@@ -685,23 +690,23 @@ $(document).ready(function() {
       })
     }, 500)
 
-    setTimeout(function() {
-      chrome.storage.local.get(['userInfo'], function(result) {
-        var userInfo = result.userInfo
-        if (userInfo && userInfo.vid) {
-          fetch(`https://i.weread.qq.com/readdetail?baseTimestamp=${getMondayTimestamp()}&count=1&type=0`).then(function(resp) {
-            return resp.json()
-          }).then(function(data) {
-            if (data && data.datas && data.datas.length > 0) {
-              var _data = data.datas[0]
-              if (_data.timeMeta && _data.timeMeta.totalReadTime != undefined) {
-                chrome.storage.local.set({'totalReadTime': _data.timeMeta.totalReadTime})
-              }
-            }
-          })
-        }
-      })
-    }, 2000)
+    // setTimeout(function() {
+    //   chrome.storage.local.get(['userInfo'], function(result) {
+    //     var userInfo = result.userInfo
+    //     if (userInfo && userInfo.vid) {
+    //       fetch(`https://i.weread.qq.com/readdetail?baseTimestamp=${getMondayTimestamp()}&count=1&type=0`).then(function(resp) {
+    //         return resp.json()
+    //       }).then(function(data) {
+    //         if (data && data.datas && data.datas.length > 0) {
+    //           var _data = data.datas[0]
+    //           if (_data.timeMeta && _data.timeMeta.totalReadTime != undefined) {
+    //             chrome.storage.local.set({'totalReadTime': _data.timeMeta.totalReadTime})
+    //           }
+    //         }
+    //       })
+    //     }
+    //   })
+    // }, 2000)
 
     setTimeout(function() {
       chrome.storage.local.get(['last_card_summary'], function(result) {
@@ -715,13 +720,23 @@ $(document).ready(function() {
       })
     }, 2000)
 
+    let url = 'https://weread.qq.com/web/shelf';
+
+    if(currentpath.indexOf(shelfArchivePage) >= 0) {
+      url = currentpath;
+    }
+    console.log(url);
+
     fetch('https://weread.qq.com/web/shelf').then(function(resp) {return resp.text()}).then(function(data) {
       var initdata = JSON.parse(data.match(/window\.__INITIAL_STATE__\=({.*?});/)[1])
+      console.log(initdata);
       if (initdata.shelf.books) {
-        var books = initdata.shelf.books
+        var books = initdata.shelf.rawBooks
+        console.log(books);
         for(var i=0;i<books.length;i++) {
           shelfdict[make_me_happy(books[i].bookId)] = books[i]
         }
+        console.log(shelfdict);
       }
       if (initdata.shelf) {
         chrome.storage.local.set({'userShelf': initdata.shelf}, function() {})
@@ -729,23 +744,12 @@ $(document).ready(function() {
     })
   }
 
-  var _shelfBox = $(`
-    <div style="display: flex; flex-direction: row; font-size: 14px; color: gray; margin-top: 10px;" class="m_shelf_admin">
-      <a class="m_webook_shelf_mp" style="padding: 5px 0; margin-right:10px; cursor: pointer; color: #5d646e;" data-status="close">查看公众号</a>
-      <a class="m_webook_shelf_admin" style="padding: 5px 0; margin-right:10px; cursor: pointer; color: #5d646e;" data-status="close">整理书架</a>
-      <a class="op m_webook_shelf_remove_book" style="padding: 5px 0; margin-right:10px; cursor: pointer; color: #5d646e; display:none;">移出</a>
-      <a class="op m_webook_shelf_make_book_private" style="padding: 5px 0; margin-right:10px; cursor: pointer; color: #5d646e; display:none;">私密阅读</a>
-      <a class="op m_webook_shelf_make_book_public" style="padding: 5px 0; margin-right:10px; cursor: pointer; color: #5d646e; display:none;">公开阅读</a>
-      <a class="op m_webook_shelf_select_all" style="padding: 5px 0; margin-right:10px; cursor: pointer; color: #5d646e; display:none;">全选</a>
-    </div>
-  `)
+
 
   var shelf_download_app = $('.shelf_download_app')
   if (shelf_download_app) {
     shelf_download_app.remove()
   }
-
-  $('.shelf_header').after(_shelfBox)
 
   let _mpBox = $(`
     <div id="webook_mp_box" class="wr_dialog" style="display: none;">
@@ -762,6 +766,23 @@ $(document).ready(function() {
       </div>
     </div>
   `)
+
+  var _shelfBox = $(`
+    <div style="top:100px;right:2%;position: fixed;z-index:1000;">
+    <div style="display: flex; flex-direction: row; font-size: 14px; color: gray; padding: 8px 15px;background:#fff;border-radius:5px;" class="m_shelf_admin">
+      <a class="m_webook_shelf_mp" style="padding: 5px 0; margin-right:10px; cursor: pointer; color: #5d646e;" data-status="close">查看公众号</a>
+      <a class="m_webook_shelf_admin" style="padding: 5px 0; margin-right:10px; cursor: pointer; color: #5d646e;" data-status="close">整理书架</a>
+      <a class="op m_webook_shelf_remove_book" style="padding: 5px 0; margin-right:10px; cursor: pointer; color: #5d646e; display:none;">移出</a>
+      <a class="op m_webook_shelf_make_book_private" style="padding: 5px 0; margin-right:10px; cursor: pointer; color: #5d646e; display:none;">私密阅读</a>
+      <a class="op m_webook_shelf_make_book_public" style="padding: 5px 0; margin-right:10px; cursor: pointer; color: #5d646e; display:none;">公开阅读</a>
+      <a class="op m_webook_shelf_export_note" style="padding: 5px 0; margin-right:10px; cursor: pointer; color: #5d646e; display:none;">导出笔记</a>
+      <a class="op m_webook_shelf_select_all" style="padding: 5px 0; margin-right:10px; cursor: pointer; color: #5d646e; display:none;">全选</a>
+    </div>
+    </div>
+  `);
+
+  // $('.shelf_header').after(_shelfBox);
+  $('body').append(_shelfBox);
 
   if (currentpath === shelfPage) {
     $('body').append(_mpBox)
@@ -907,6 +928,29 @@ $(document).ready(function() {
       shelfRemoveBook(bookIds)
     }
   })
+  $(".m_webook_shelf_export_note").click(function () {
+      let e = [];
+      $(".m_webook_shelf_checkbox > input").each(function () {
+        $(this).is(":checked") && e.push($(this).data("id").toString());
+      });
+      if(e.length > 0) {
+        showToast(`正在导出，大约需要 ${1.5 * e.length} 秒`);
+        fetchNotes(e).then(function (e) {
+             console.log("***happy***", e.length);
+             console.log('exportNotes',e);
+              showToast("👏 导出成功");
+              $(".m_webook_shelf_checkbox > input").prop("checked", !1),
+              setTimeout(function () {
+                chrome.storage.local.set({ notes: e }, function () {
+                  chrome.runtime.sendMessage({
+                    action: "exportNotes",
+                    data: e,
+                  });
+                });
+              }, 1e3);
+          });
+      }
+    })
 
   $('.m_webook_shelf_select_all').click(function() {
     shelfSelectAll()

@@ -1,0 +1,19 @@
+{
+  "files": {
+    "main.css": "/src/notehub/static/css/main.af80f3ae.chunk.css",
+    "main.js": "/src/notehub/static/js/main.198b574d.chunk.js",
+    "runtime-main.js": "/src/notehub/static/js/runtime-main.83419278.js",
+    "static/js/2.1afbd823.chunk.js": "/src/notehub/static/js/2.1afbd823.chunk.js",
+    "index.html": "/src/notehub/index.html",
+    "precache-manifest.486bf065ae2db11cb72e7af816440ea2.js": "/src/notehub/precache-manifest.486bf065ae2db11cb72e7af816440ea2.js",
+    "service-worker.js": "/src/notehub/service-worker.js",
+    "static/js/2.1afbd823.chunk.js.LICENSE.txt": "/src/notehub/static/js/2.1afbd823.chunk.js.LICENSE.txt",
+    "static/media/logo.svg": "/src/notehub/static/media/logo.5d5d9eef.svg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.83419278.js",
+    "static/js/2.1afbd823.chunk.js",
+    "static/css/main.af80f3ae.chunk.css",
+    "static/js/main.198b574d.chunk.js"
+  ]
+}

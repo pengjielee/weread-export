@@ -517,6 +517,10 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
         chrome.tts.stop()
       }
     })
+  } else if (action === 'exportNotes') {
+    chrome.tabs.create({
+      url: chrome.runtime.getURL("src/notehub/index.html"),
+    });
   }
 
   sendResponse(`${action} _ ${msg}`)
