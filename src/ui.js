@@ -154,18 +154,32 @@ function shelfInsertCheckbox() {
           <input type="checkbox" data-id="${shelfdict[_key].bookId}" style="transform:scale(2);visibility: visible;width:20px;height:20px;"/>
         </div>
         `))
-        $(this).attr('id', `bookid-${shelfdict[_key].bookId}`)
+        $(this).append('<div class="m_webook_shelf_overlay"></div>');
+        $(this).attr('id', `bookid-${shelfdict[_key].bookId}`);
+        $(this).removeAttr('href');
+        $(this).attr('data-href', href);
       }
     }
   })
   $('input[type="checkbox"]').click(function(e) {
-    e.stopPropagation()
+    e.stopPropagation();
+    getCheckedNumber();
+  });
+  $('.shelfBook').click(function(e) {
+    var checked = $(this).find('.m_webook_shelf_checkbox > input').prop('checked');
+    $(this).find('.m_webook_shelf_checkbox > input').prop('checked', !checked);
+    getCheckedNumber();
   })
 }
 
 
 function shelfRemoveCheckbox() {
-  $('.m_webook_shelf_checkbox').remove()
+  $('.m_webook_shelf_checkbox').remove();
+  $('.shelfBook').each(function() {
+    var href = $(this).attr('data-href')
+    $(this).attr('href',href);
+    $(this).attr('data-href','');
+  })
 }
 
 
@@ -255,6 +269,7 @@ function shelfSelectAll() {
   } else {
     $('.m_webook_shelf_checkbox > input').prop('checked', false)
   }
+  getCheckedNumber();
 }
 
 
@@ -290,6 +305,16 @@ async function fetchNotes(bookIds) {
     await sleep(500)
   }
   return notes
+}
+
+function getCheckedNumber() {
+  let number = 0;
+  $(".m_webook_shelf_checkbox > input").each(function(){
+    if($(this).is(":checked")) {
+      number++;
+    }
+  });
+  $('#checked_number').text(`（${number}）`);
 }
 
 
@@ -455,6 +480,9 @@ $(document).ready(function() {
 
   .css_ui_1 {
     background-color: #e2e2e4;
+  }
+  .shelfBook {
+    position: relative;
   }
   .shelfBook .title {
     min-height: 36px;
@@ -830,17 +858,14 @@ $(document).ready(function() {
 
   var _shelfBox = $(`
     <div style="top:100px;right:2%;position: fixed;z-index:1000;">
-    <div style="display: flex; flex-direction: row; font-size: 14px; color: gray; padding: 8px 15px;background:#fff;border-radius:5px;" class="m_shelf_admin">
-
-
-
-      <a class="m_webook_shelf_mp" style="padding: 5px 0; margin-right:10px; cursor: pointer; color: #5d646e; display: none;" data-status="close">查看公众号</a>
-      <a class="m_webook_shelf_admin" style="padding: 5px 0; margin-right:10px; cursor: pointer; color: #5d646e;" data-status="close">整理书架</a>
-      <a class="m_webook_shelf_remove_book" style="padding: 5px 0; margin-right:10px; cursor: pointer; color: #5d646e; display:none;">移出</a>
-      <a class="m_webook_shelf_make_book_private" style="padding: 5px 0; margin-right:10px; cursor: pointer; color: #5d646e; display:none;">私密阅读</a>
-      <a class="m_webook_shelf_make_book_public" style="padding: 5px 0; margin-right:10px; cursor: pointer; color: #5d646e; display:none;">公开阅读</a>
-      <a class="op m_webook_shelf_export_note" style="padding: 5px 0; margin-right:10px; cursor: pointer; color: #5d646e; display:none;">导出笔记</a>
-      <a class="op m_webook_shelf_select_all" style="padding: 5px 0; margin-right:10px; cursor: pointer; color: #5d646e; display:none;">全选</a>
+    <div style="display: flex; flex-direction: row; font-size: 14px; color: gray; padding:10px 30px;background:#fff;border-radius:5px;" class="m_shelf_admin">
+      <a class="m_webook_shelf_mp" style="padding: 5px 0; margin-left:10px; cursor: pointer; color: #5d646e; display: none;" data-status="close">查看公众号</a>
+      <a class="m_webook_shelf_admin" style="padding: 5px 0; cursor: pointer; color: #5d646e;" data-status="close">整理书架</a>
+      <a class="m_webook_shelf_remove_book" style="padding: 5px 0; margin-left:15px; cursor: pointer; color: #5d646e; display:none;">移出</a>
+      <a class="m_webook_shelf_make_book_private" style="padding: 5px 0; margin-left:15px; cursor: pointer; color: #5d646e; display:none;">私密阅读</a>
+      <a class="m_webook_shelf_make_book_public" style="padding: 5px 0; margin-left:15px; cursor: pointer; color: #5d646e; display:none;">公开阅读</a>
+      <a class="op m_webook_shelf_export_note" style="padding: 5px 0; margin-left:15px; cursor: pointer; color: #5d646e; display:none;">导出笔记<span id="checked_number"></span></a>
+      <a class="op m_webook_shelf_select_all" style="padding: 5px 0; margin-left:15px; cursor: pointer; color: #5d646e; display:none;">全选</a>
     </div>
     </div>
   `);
@@ -992,6 +1017,7 @@ $(document).ready(function() {
       shelfRemoveBook(bookIds)
     }
   })
+
   $(".m_webook_shelf_export_note").click(function () {
       let e = [];
       $(".m_webook_shelf_checkbox > input").each(function () {
