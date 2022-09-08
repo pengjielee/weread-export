@@ -32,7 +32,7 @@
   "content_scripts": [{
     "run_at": "document_end",
     "matches": ["*://weread.qq.com/*"],
-    "js": ["assets/js/jquery.min.js", "assets/js/lodash.min.js", "src/ui.js"]
+    "js": ["assets/js/jquery.min.js", "assets/js/lodash.min.js", "assets/js/dayjs.min.js","assets/js/FileSaver.js", "src/ui.js"]
   }],
   "content_security_policy": "script-src 'self' 'sha256-NeK5uABt0EHXknKz0Fuhb7a5Zbb44aQ0yGE+wP/uoBo='; object-src 'self'"
 }

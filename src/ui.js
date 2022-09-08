@@ -54,6 +54,34 @@ function copy(str, mimeType) {
   document.execCommand('copy', false, null)
 }
 
+function next(data) {
+  /** @type {!Array} */
+  var stops = [];
+  var cache = {};
+  /** @type {number} */
+  var i = 0;
+  for (; i < data.chapters.length; i++) {
+    cache[data.chapters[i].chapterUid] = {
+      title : data.chapters[i].title,
+      texts : []
+    };
+  }
+  var m = data.updated;
+  m.sort(function(e, t) {
+    return parseInt(e.range.split("-")[0]) - parseInt(t.range.split("-")[0]);
+  });
+  /** @type {number} */
+  var k = 0;
+  for (; k < m.length; k++) {
+    cache[data.updated[k].chapterUid].texts.push(m[k].markText);
+  }
+  return (stops = Object.keys(cache).map(function(colorSpace) {
+    return [colorSpace, cache[colorSpace]];
+  })).sort(function(subtractor, subtractee) {
+    return subtractor[0] - subtractee[0];
+  }), data.notes = stops, data;
+}
+
 
 function setScreen(px) {
   if (px > 0) {
@@ -744,6 +772,22 @@ $(document).ready(function() {
     })
   }
 
+  var _exportNotes = (notes) => {
+    notes.forEach(function (e) {
+      var t = next(e),
+        o = "## ".concat(e.book.title, "\n\n> **").concat(e.book.author, "**\n\n");
+      t.notes.forEach(function (e) {
+        (o += "\n### ".concat(e[1].title, "\n\n")),
+          e[1].texts.forEach(function (e) {
+            o += "* ".concat(e, "\n\n");
+          });
+      });
+      o += `导出于 ${dayjs().format("YYYY-MM-DD HH:mm:ss")}\n\n`;
+      var blob = new Blob([o], { type: "text/txt;charset=utf-8" });
+      // Object(I.saveAs)(a, "".concat(e.book.title, ".md"));
+      window.saveAs(blob, "".concat(e.book.title, ".md"));
+    })
+  }
 
 
   var shelf_download_app = $('.shelf_download_app')
@@ -938,16 +982,18 @@ $(document).ready(function() {
         fetchNotes(e).then(function (e) {
              console.log("***happy***", e.length);
              console.log('exportNotes',e);
+              window.__EXPORT_NOTES = e;
               showToast("👏 导出成功");
               $(".m_webook_shelf_checkbox > input").prop("checked", !1),
-              setTimeout(function () {
-                chrome.storage.local.set({ notes: e }, function () {
-                  chrome.runtime.sendMessage({
-                    action: "exportNotes",
-                    data: e,
-                  });
-                });
-              }, 1e3);
+              _exportNotes(e);
+              // setTimeout(function () {
+              //   chrome.storage.local.set({ notes: e }, function () {
+              //     chrome.runtime.sendMessage({
+              //       action: "exportNotes",
+              //       data: e,
+              //     });
+              //   });
+              // }, 1e3);
           });
       }
     })
