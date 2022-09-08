@@ -151,7 +151,7 @@ function shelfInsertCheckbox() {
       if (shelfdict[_key]) {
         $(this).append($(`
         <div class="m_webook_shelf_checkbox" style="padding: 5px; display: flex; align-items: center; justify-content: center;">
-          <input type="checkbox" data-id="${shelfdict[_key].bookId}" style="transform:scale(2)"/>
+          <input type="checkbox" data-id="${shelfdict[_key].bookId}" style="transform:scale(2);visibility: visible;width:20px;height:20px;"/>
         </div>
         `))
         $(this).attr('id', `bookid-${shelfdict[_key].bookId}`)
@@ -458,7 +458,7 @@ $(document).ready(function() {
   }
   .shelfBook .title {
     min-height: 36px;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
   }
   `
 
@@ -772,8 +772,19 @@ $(document).ready(function() {
     })
   }
 
-  var _exportNotes = (notes) => {
-    notes.forEach(function (e) {
+  var _saveAs = (name, text) => {
+    var a = document.createElement("a");
+    var file = new Blob([text], {type: "text/txt;charset=utf-8"});
+    a.href = window.URL.createObjectURL(file);
+    a.download = name;
+    document.body.append(a);
+    a.dispatchEvent(new MouseEvent('click', {'bubbles': false, 'cancelable': true}));
+  }
+
+  var _exportNotes = async (notes) => {
+    let count = 0;
+    for(let i =0; i < notes.length; i++) {
+      var e = notes[i];
       var t = next(e),
         o = "## ".concat(e.book.title, "\n\n> **").concat(e.book.author, "**\n\n");
       t.notes.forEach(function (e) {
@@ -785,8 +796,14 @@ $(document).ready(function() {
       o += `导出于 ${dayjs().format("YYYY-MM-DD HH:mm:ss")}\n\n`;
       var blob = new Blob([o], { type: "text/txt;charset=utf-8" });
       // Object(I.saveAs)(a, "".concat(e.book.title, ".md"));
+      console.log('save', count, e.book.title);
       window.saveAs(blob, "".concat(e.book.title, ".md"));
-    })
+      if(++count >= 8) {
+        console.log('sleep');
+        await sleep(1500);
+        count = 0;
+      }
+    }
   }
 
 
@@ -814,11 +831,14 @@ $(document).ready(function() {
   var _shelfBox = $(`
     <div style="top:100px;right:2%;position: fixed;z-index:1000;">
     <div style="display: flex; flex-direction: row; font-size: 14px; color: gray; padding: 8px 15px;background:#fff;border-radius:5px;" class="m_shelf_admin">
-      <a class="m_webook_shelf_mp" style="padding: 5px 0; margin-right:10px; cursor: pointer; color: #5d646e;" data-status="close">查看公众号</a>
+
+
+
+      <a class="m_webook_shelf_mp" style="padding: 5px 0; margin-right:10px; cursor: pointer; color: #5d646e; display: none;" data-status="close">查看公众号</a>
       <a class="m_webook_shelf_admin" style="padding: 5px 0; margin-right:10px; cursor: pointer; color: #5d646e;" data-status="close">整理书架</a>
-      <a class="op m_webook_shelf_remove_book" style="padding: 5px 0; margin-right:10px; cursor: pointer; color: #5d646e; display:none;">移出</a>
-      <a class="op m_webook_shelf_make_book_private" style="padding: 5px 0; margin-right:10px; cursor: pointer; color: #5d646e; display:none;">私密阅读</a>
-      <a class="op m_webook_shelf_make_book_public" style="padding: 5px 0; margin-right:10px; cursor: pointer; color: #5d646e; display:none;">公开阅读</a>
+      <a class="m_webook_shelf_remove_book" style="padding: 5px 0; margin-right:10px; cursor: pointer; color: #5d646e; display:none;">移出</a>
+      <a class="m_webook_shelf_make_book_private" style="padding: 5px 0; margin-right:10px; cursor: pointer; color: #5d646e; display:none;">私密阅读</a>
+      <a class="m_webook_shelf_make_book_public" style="padding: 5px 0; margin-right:10px; cursor: pointer; color: #5d646e; display:none;">公开阅读</a>
       <a class="op m_webook_shelf_export_note" style="padding: 5px 0; margin-right:10px; cursor: pointer; color: #5d646e; display:none;">导出笔记</a>
       <a class="op m_webook_shelf_select_all" style="padding: 5px 0; margin-right:10px; cursor: pointer; color: #5d646e; display:none;">全选</a>
     </div>
@@ -984,7 +1004,7 @@ $(document).ready(function() {
              console.log('exportNotes',e);
               window.__EXPORT_NOTES = e;
               showToast("👏 导出成功");
-              $(".m_webook_shelf_checkbox > input").prop("checked", !1),
+              // $(".m_webook_shelf_checkbox > input").prop("checked", !1),
               _exportNotes(e);
               // setTimeout(function () {
               //   chrome.storage.local.set({ notes: e }, function () {
