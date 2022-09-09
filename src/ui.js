@@ -403,6 +403,7 @@ function _zudui(force) {
 }
 
 $(document).ready(function() {
+   
 
   for (var i = 1; i < 99999; i++) {
      window.clearInterval(i);
@@ -411,19 +412,19 @@ $(document).ready(function() {
   var _css = `
   @media (max-width: 1120px) {
     .m_shelf_admin {
-      padding: 0 40px;
+      
     }
   }
 
   @media (max-width: 960px) {
     .m_shelf_admin {
-      padding: 0 30px;
+      
     }
   }
 
   @media (max-width: 680px) {
     .m_shelf_admin {
-      padding: 0 30px;
+      
     }
   }
 
@@ -483,11 +484,55 @@ $(document).ready(function() {
   }
   .shelfBook {
     position: relative;
+    cursor: pointer;
   }
   .shelfBook .title {
     min-height: 36px;
     margin-bottom: 20px;
   }
+  .btn1 {
+    font-size: 16px;
+    background: #0078D4;
+    padding:8px 10px;
+    color: #fff;
+    min-width: 120px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+  }
+  .btn1:hover {
+    background: #006CBE;
+  }
+  .m_shelf_admin {
+     display: flex;
+     flex-direction: column;
+  }
+           
+   .btn {
+      background-image: linear-gradient(to right, #194be0 0%, #217dda 51%, #2834dd 100%);
+      text-align: center;
+      text-transform: uppercase;
+      transition: 0.5s;
+      background-size: 200% auto;
+      color: white;            
+      box-shadow: 0 0 20px #eee;
+      border-radius: 10px;
+      display: block;
+    }
+
+    .btn:hover {
+      background-position: right center; /* change the direction of the change here */
+      color: #fff;
+      text-decoration: none;
+    }
+
+    .btn {
+      border-radius: 5px;
+      margin-bottom: 10px;
+      padding: 10px;
+      font-size: 14px;
+      min-width: 120px;
+    }
+         
   `
 
   $('body').prepend(`<style>${_css}</style>`)
@@ -857,21 +902,23 @@ $(document).ready(function() {
   `)
 
   var _shelfBox = $(`
-    <div style="top:100px;right:2%;position: fixed;z-index:1000;">
-    <div style="display: flex; flex-direction: row; font-size: 14px; color: gray; padding:10px 30px;background:#fff;border-radius:5px;" class="m_shelf_admin">
+    <div style="top:10px;right:10px;position: fixed;z-index:1000;">
+    <div class="m_shelf_admin">
       <a class="m_webook_shelf_mp" style="padding: 5px 0; margin-left:10px; cursor: pointer; color: #5d646e; display: none;" data-status="close">查看公众号</a>
-      <a class="m_webook_shelf_admin" style="padding: 5px 0; cursor: pointer; color: #5d646e;" data-status="close">整理书架</a>
+      <button class="m_webook_shelf_admin btn" data-status="close">整理书架</button>
       <a class="m_webook_shelf_remove_book" style="padding: 5px 0; margin-left:15px; cursor: pointer; color: #5d646e; display:none;">移出</a>
       <a class="m_webook_shelf_make_book_private" style="padding: 5px 0; margin-left:15px; cursor: pointer; color: #5d646e; display:none;">私密阅读</a>
       <a class="m_webook_shelf_make_book_public" style="padding: 5px 0; margin-left:15px; cursor: pointer; color: #5d646e; display:none;">公开阅读</a>
-      <a class="op m_webook_shelf_export_note" style="padding: 5px 0; margin-left:15px; cursor: pointer; color: #5d646e; display:none;">导出笔记<span id="checked_number"></span></a>
-      <a class="op m_webook_shelf_select_all" style="padding: 5px 0; margin-left:15px; cursor: pointer; color: #5d646e; display:none;">全选</a>
+      <button class="op m_webook_shelf_select_all btn" style="cursor: pointer; display:none;">全选</button>
+      <button class="op m_webook_shelf_export_note btn" style="cursor: pointer; display:none;">导出笔记<span id="checked_number"></span></button>
     </div>
     </div>
   `);
 
   // $('.shelf_header').after(_shelfBox);
   $('body').append(_shelfBox);
+
+  getCheckedNumber();
 
   if (currentpath === shelfPage) {
     $('body').append(_mpBox)
@@ -973,11 +1020,11 @@ $(document).ready(function() {
     let status = $(this).data('status')
     if (status == 'close') {
       shelfInsertCheckbox()
-      $('.m_shelf_admin > a.op').css('display', 'block')
+      $('.m_shelf_admin > button.op').css('display', 'block')
       $(this).data('status', 'open')
     } else {
       shelfRemoveCheckbox()
-      $('.m_shelf_admin > a.op').css('display', 'none')
+      $('.m_shelf_admin > button.op').css('display', 'none')
       $(this).data('status', 'close')
     }
   })
@@ -1030,7 +1077,7 @@ $(document).ready(function() {
              console.log('exportNotes',e);
               window.__EXPORT_NOTES = e;
               showToast("👏 导出成功");
-              // $(".m_webook_shelf_checkbox > input").prop("checked", !1),
+              $(".m_webook_shelf_checkbox > input").prop("checked", !1),
               _exportNotes(e);
               // setTimeout(function () {
               //   chrome.storage.local.set({ notes: e }, function () {
