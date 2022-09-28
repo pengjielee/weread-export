@@ -508,7 +508,8 @@ $(document).ready(function() {
   }
            
    .btn {
-      background-image: linear-gradient(to right, #194be0 0%, #217dda 51%, #2834dd 100%);
+      /*background-image: linear-gradient(to right, #194be0 0%, #217dda 51%, #2834dd 100%);*/
+      background-image: linear-gradient(to right, #2980b9 0%, #2c3e50 51%, #2980b9 100%);
       text-align: center;
       text-transform: uppercase;
       transition: 0.5s;
@@ -517,6 +518,7 @@ $(document).ready(function() {
       box-shadow: 0 0 20px #eee;
       border-radius: 10px;
       display: block;
+      cursor: pointer;
     }
 
     .btn:hover {
@@ -530,7 +532,7 @@ $(document).ready(function() {
       margin-bottom: 10px;
       padding: 10px;
       font-size: 14px;
-      min-width: 120px;
+     
     }
          
   `
@@ -858,8 +860,13 @@ $(document).ready(function() {
     let count = 0;
     for(let i =0; i < notes.length; i++) {
       var e = notes[i];
-      var t = next(e),
-        o = "## ".concat(e.book.title, "\n\n> **").concat(e.book.author, "**\n\n");
+      var t = next(e);
+      var o = `---
+title: ${e.book.title}
+date: ${dayjs().format("YYYY-MM-DD")}T${dayjs().format("HH:mm:ss")}+08:00
+draft: true
+---\n\n`
+      o += "## ".concat(e.book.title, "\n\n> **").concat(e.book.author, "**\n\n");
       t.notes.forEach(function (e) {
         (o += "\n### ".concat(e[1].title, "\n\n")),
           e[1].texts.forEach(function (e) {
@@ -902,10 +909,10 @@ $(document).ready(function() {
   `)
 
   var _shelfBox = $(`
-    <div style="top:10px;right:10px;position: fixed;z-index:1000;">
+    <div style="top:80px;right:10px;position: fixed;z-index:1000;" class="m_shelf_admin_container">
     <div class="m_shelf_admin">
       <a class="m_webook_shelf_mp" style="padding: 5px 0; margin-left:10px; cursor: pointer; color: #5d646e; display: none;" data-status="close">查看公众号</a>
-      <button class="m_webook_shelf_admin btn" data-status="close">整理书架</button>
+      <button class="m_webook_shelf_admin btn" data-status="close">整理</button>
       <a class="m_webook_shelf_remove_book" style="padding: 5px 0; margin-left:15px; cursor: pointer; color: #5d646e; display:none;">移出</a>
       <a class="m_webook_shelf_make_book_private" style="padding: 5px 0; margin-left:15px; cursor: pointer; color: #5d646e; display:none;">私密阅读</a>
       <a class="m_webook_shelf_make_book_public" style="padding: 5px 0; margin-left:15px; cursor: pointer; color: #5d646e; display:none;">公开阅读</a>
@@ -1093,5 +1100,9 @@ $(document).ready(function() {
 
   $('.m_webook_shelf_select_all').click(function() {
     shelfSelectAll()
+  })
+
+  $('.m_webook_shelf_select_hide').click(function(){
+    $('.m_shelf_admin_container').css('right', '-80px');
   })
 })
