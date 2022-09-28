@@ -866,7 +866,8 @@ title: ${e.book.title}
 date: ${dayjs().format("YYYY-MM-DD")}T${dayjs().format("HH:mm:ss")}+08:00
 draft: true
 ---\n\n`
-      o += "## ".concat(e.book.title, "\n\n> **").concat(e.book.author, "**\n\n");
+      //o += "## ".concat(e.book.title, "\n\n> **").concat(e.book.author, "**\n\n");
+      o += "**".concat(e.book.author, "**\n\n");
       t.notes.forEach(function (e) {
         (o += "\n### ".concat(e[1].title, "\n\n")),
           e[1].texts.forEach(function (e) {
